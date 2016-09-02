@@ -1,6 +1,14 @@
 #Github repo switcher
 
 GH_BASE_DIR=${GH_BASE_DIR:-$HOME/src}
+
+# $1 username
+# $2 repo
+get_tmuxinator_name()
+{
+    echo "${1}_${2}"
+}
+
 function gh () {
   typeset +x account=$GITHUB[user]
   typeset +x repo=""
@@ -23,5 +31,20 @@ function gh () {
     fi
   fi
 
-  cd $directory
+  if [ "$GH_TMUXINATOR" -eq 1 ] && tmuxinator doctor &>/dev/null
+  then
+      name="$(get_tmuxinator_name "$account" "$repo")"
+      file="$HOME/.tmuxinator/${name}.yml"
+
+      if [ ! -f "$file" ]
+      then
+          echo "Tmuxinator project $name does not exist yet, creating it."
+          cp "$HOME/.tmuxinator/gh_base.yml" "$file" 
+          echo "$(sed "s|name: gh_base|name: ${name}\nroot: ${directory}|" "$file")" > "$file"
+      fi
+
+      tmuxinator start "$name"
+  else
+      cd $directory
+  fi
 }
