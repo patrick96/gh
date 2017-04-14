@@ -31,7 +31,7 @@ function gh () {
     fi
   fi
 
-  if [ "$GH_TMUXINATOR" -eq 1 ] && tmuxinator doctor &>/dev/null
+  if [ "$GH_TMUXINATOR" -eq 1 ] && [ -z "$TMUX" ] && tmuxinator doctor &>/dev/null
   then
       name="$(get_tmuxinator_name "$account" "$repo")"
       file="$HOME/.tmuxinator/${name}.yml"
