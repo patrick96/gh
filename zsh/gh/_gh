@@ -36,7 +36,7 @@ case $state in
         IFS=$' '
         if [ -n "$repos" ] && command -v jsawk > /dev/null 2>&1
         then
-            javascript='return this.reduce(function(prev, cur, curI, array) {return prev + "\n" + cur.name + "[" + (!cur.description? cur.name + " has no description" : cur.description) + "]";}, "")'
+            javascript='return this.reduce(function(prev, cur, curI, array) {return prev + "\n" + cur.name + "[" + (!cur.description? cur.name + " has no description" : cur.description.replace("[", "\\\[").replace("]", "\\\]")) + "]";}, "")'
             _repos=(${(f)$(echo $repos | jsawk -a $javascript)})
         fi
         _local_repos=(${$(echo $GH_BASE_DIR/github.com/$user/*):r:t})
