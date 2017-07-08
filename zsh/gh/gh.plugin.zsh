@@ -6,7 +6,7 @@ GH_BASE_DIR=${GH_BASE_DIR:-$HOME/src}
 # $2 repo
 get_tmuxinator_name()
 {
-    echo "${1}_${2}"
+    echo "${1}_${2}" | tr '.' '-'
 }
 
 function gh () {
