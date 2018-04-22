@@ -6,6 +6,24 @@ local state line ret=1
 GH_FETCH_REPOS=${GH_FETCH_REPOS:-false}
 GH_BASE_DIR=${GH_BASE_DIR:-$HOME/src}
 
+# Reduces the JSON from the github servers stored in 'repos' to 
+# 'name [description]' lines that the zsh completion engine can use
+javascript='
+var output = repos.reduce(
+    function(prev, cur, curI, array) {
+        var descr = "";
+        if(cur.description) {
+            descr = cur.description.replace("[", "\\\[").replace("]", "\\\]");
+        }
+        else {
+            descr = cur.name + " has no description";
+        }
+
+        return prev + "\n" + cur.name + "[" + descr + "]";
+    }, "");
+
+print(output);'
+
 _arguments -C \
     '1: :->user' \
     '2:: :->repo' && ret=0
@@ -34,10 +52,8 @@ case $state in
             _retrieve_cache $user_repo
         fi
         IFS=$' '
-        if [ -n "$repos" ] && command -v jsawk > /dev/null 2>&1
-        then
-            javascript='return this.reduce(function(prev, cur, curI, array) {return prev + "\n" + cur.name + "[" + (!cur.description? cur.name + " has no description" : cur.description.replace("[", "\\\[").replace("]", "\\\]")) + "]";}, "")'
-            _repos=(${(f)$(echo $repos | jsawk -a $javascript)})
+        if [ -n "$repos" ] && command -v js52 > /dev/null 2>&1; then
+            _repos=(${(f)$(js52 -f <(echo "var repos = $repos;") -e "$javascript")})
         fi
         _local_repos=(${$(echo $GH_BASE_DIR/github.com/$user/*):r:t})
         for l in $_local_repos
