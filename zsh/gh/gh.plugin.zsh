@@ -2,11 +2,9 @@
 
 GH_BASE_DIR=${GH_BASE_DIR:-$HOME/src}
 GH_PROTO=${GH_PROTO:-"ssh"}
-# $1 username
-# $2 repo
-get_tmuxinator_name()
-{
-    echo "${1}_${2}" | tr '.' '-'
+
+escape_name() {
+    echo "${1}" | tr '|/.' '-'
 }
 
 function gh () {
@@ -39,14 +37,19 @@ function gh () {
 
   if [ "$GH_TMUXINATOR" -eq 1 ] && [ -z "$TMUX" ] && tmuxinator doctor &>/dev/null
   then
-      name="$(get_tmuxinator_name "$account" "$repo")"
+      account_esc="$(escape_name "$account")"
+      repo_esc="$(escape_name "$repo")"
+      name="${account_esc}/${repo_esc}"
       file="$HOME/.tmuxinator/${name}.yml"
+
+      mkdir -p $(dirname "$file")
 
       if [ ! -f "$file" ]
       then
           echo "Tmuxinator project $name does not exist yet, creating it."
-          cp "$HOME/.tmuxinator/gh_base.yml" "$file" 
-          echo "$(sed "s|name: gh_base|name: ${name}\nroot: ${directory}|" "$file")" > "$file"
+          echo "root: ${directory}" > "$file"
+          cat "$HOME/.tmuxinator/gh_base.yml" >> "$file" 
+          sed -i "s|%NAME%|${name}|g; s|%REPO%|${repo_esc}|g" "$file"
       fi
 
       tmuxinator start "$name"
