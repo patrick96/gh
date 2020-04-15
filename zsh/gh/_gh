@@ -13,7 +13,7 @@ var output = repos.reduce(
     function(prev, cur, curI, array) {
         var descr = "";
         if(cur.description) {
-            descr = cur.description.replace("[", "\\\[").replace("]", "\\\]");
+            descr = cur.description.replace(/\[/g, "\\\[").replace(/\]/g, "\\\]");
         }
         else {
             descr = cur.name + " has no description";
