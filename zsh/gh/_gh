@@ -22,11 +22,19 @@ var output = repos.reduce(
         return prev + "\n" + cur.name + "[" + descr + "]";
     }, "");
 
-print(output);'
+console.log(output);'
 
 _arguments -C \
     '1: :->user' \
     '2:: :->repo' && ret=0
+
+if command -v node > /dev/null 2>&1; then
+    js_interp="node"
+elif command -v js78 > /dev/null 2>&1; then
+    js_interp="js78"
+elif command -v js > /dev/null 2>&1; then
+    js_interp="js"
+fi
 
 
 case $state in 
@@ -52,8 +60,11 @@ case $state in
             _retrieve_cache $user_repo
         fi
         IFS=$' '
-        if [ -n "$repos" ] && command -v js52 > /dev/null 2>&1; then
-            _repos=(${(f)$(js52 -f <(echo "var repos = $repos;") -e "$javascript")})
+        if [ -n "$repos" ] && [ -n "$js_interp" ]; then
+            f=$(mktemp --suffix=".js");
+            echo -E "var repos = $repos; $javascript" > "$f"
+            _repos=(${(f)$("$js_interp" "$f")})
+            rm "$f"
         fi
         _local_repos=(${$(echo $GH_BASE_DIR/github.com/$user/*):r:t})
         for l in $_local_repos
