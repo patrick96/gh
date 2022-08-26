@@ -37,10 +37,11 @@ function gh () {
 
   if [ "$GH_TMUXINATOR" -eq 1 ] && [ -z "$TMUX" ] && tmuxinator doctor &>/dev/null
   then
+      base="$HOME/.config/tmuxinator"
       account_esc="$(escape_name "$account")"
       repo_esc="$(escape_name "$repo")"
       name="${account_esc}/${repo_esc}"
-      file="$HOME/.tmuxinator/${name}.yml"
+      file="${base}/${name}.yml"
 
       mkdir -p $(dirname "$file")
 
@@ -48,7 +49,7 @@ function gh () {
       then
           echo "Tmuxinator project $name does not exist yet, creating it."
           echo "root: ${directory}" > "$file"
-          cat "$HOME/.tmuxinator/gh_base.yml" >> "$file" 
+          cat "${base}/gh_base.yml" >> "$file" 
           sed -i "s|%NAME%|${name}|g; s|%REPO%|${repo_esc}|g" "$file"
       fi
 
