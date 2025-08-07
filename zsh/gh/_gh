@@ -28,12 +28,10 @@ _arguments -C \
     '1: :->user' \
     '2:: :->repo' && ret=0
 
-if command -v node > /dev/null 2>&1; then
-    js_interp="node"
-elif command -v js78 > /dev/null 2>&1; then
-    js_interp="js78"
-elif command -v js > /dev/null 2>&1; then
+if command -v js > /dev/null 2>&1; then
     js_interp="js"
+elif command -v node > /dev/null 2>&1; then
+    js_interp="node"
 fi
 
 
